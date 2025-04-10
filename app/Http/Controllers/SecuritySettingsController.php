@@ -10,8 +10,9 @@ class SecuritySettingsController extends Controller
     public function edit()
     {
         $settings = SecuritySetting::firstOrCreate([]);
-        return view('security.settings', compact('settings'));
+        return view('filament.pages.parametre-securite', compact('settings'));
     }
+
 
     public function update(Request $request)
     {
@@ -34,5 +35,26 @@ class SecuritySettingsController extends Controller
 
         return redirect()->back()->with('success', 'Paramètres de sécurité mis à jour avec succès.');
     }
+
+    public function reset()
+{
+    $defaultValues = [
+        'password_history' => 5,
+        'password_max_age' => 90,
+        'password_min_length_normal' => 8,
+        'password_min_length_admin' => 10,
+        'password_complexity' => 'upper,lower,number,special',
+        'account_lockout_threshold' => 5,
+        'lockout_counter_period' => 30,
+        'session_expiry_minutes' => 15,
+        'avoid_simultaneous_sessions' => false,
+    ];
+
+    $settings = SecuritySetting::firstOrCreate([]);
+    $settings->update($defaultValues);
+
+    return redirect()->back()->with('success', 'Paramètres réinitialisés aux valeurs par défaut.');
+}
+
 }
 

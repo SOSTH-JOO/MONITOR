@@ -1,13 +1,14 @@
 <?php
 
     // app/Models/SecuritySetting.php
-
     namespace App\Models;
 
+    use Illuminate\Database\Eloquent\Factories\HasFactory;
     use Illuminate\Database\Eloquent\Model;
 
     class SecuritySetting extends Model
     {
+        use HasFactory;
 
         protected $fillable = [
             'password_history',
@@ -21,4 +22,3 @@
             'avoid_simultaneous_sessions',
         ];
     }
-

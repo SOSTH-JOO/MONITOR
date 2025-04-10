@@ -11,4 +11,6 @@ class Mon_profil extends Page
     protected static ?string $navigationLabel = 'Mon Profil';
     protected static ?string $navigationGroup = 'Paramètres';
     protected static string $view = 'filament.pages.mon_profil';
+
+    
 }

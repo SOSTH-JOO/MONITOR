@@ -17,8 +17,12 @@ Route::post('/new_password/{slug}', [AuthController::class, 'updatePassword'])->
 Route::get('/404', [HomeController::class, 'Error404'])->name('404');
 
 
-    Route::get('/security/settings', [SecuritySettingsController::class, 'edit'])->name('security.settings.edit');
-    Route::put('/security/settings', [SecuritySettingsController::class, 'update'])->name('security.settings.update');
+Route::get('/parametre-securite', [SecuritySettingsController::class, 'edit'])->name('security.edit');
+Route::put('/parametre-securite', [SecuritySettingsController::class, 'update'])->name('security.update');
+Route::get('/parametre-securite', [SecuritySettingsController::class, 'reset'])->name('security.reset');
 
 
 Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+Route::get('/memos', [HomeController::class, 'index'])->name('memos.index');
+
+
