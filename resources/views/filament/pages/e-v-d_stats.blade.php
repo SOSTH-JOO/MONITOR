@@ -1,101 +1,82 @@
 <x-filament-panels::page>
-
-    {{-- Titre --}}
-    <div class="text-center mb-6">
+$    <div class="text-center mb-6">
         <h1 class="text-3xl font-bold text-gray-800">📊 Statistiques de La reconciliation EVD statistiques</h1>
         <p class="text-gray-500">Analyse de la reconciliation au fil du temps</p>
     </div>
 
-
-
-    {{-- Graphique à barres horizontales --}}
     <div class="bg-white rounded-lg shadow p-6 mb-10">
         <h2 class="text-xl font-semibold mb-4 text-gray-700">📊  Balances ERS</h2>
-        <canvas id="balanceChart" height="100"></canvas>
+        <div style="width: 100%; height: 400px; position: relative;">
+            <canvas id="myChart"></canvas>
+        </div>
     </div>
 
-    {{-- Tableau --}}
-    <div class="overflow-x-auto bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold mb-4 text-gray-700">🧾Tableau  des statistiques de EVD </h2>
-        <table class="w-full text-sm text-left text-gray-700">
-            <thead class="text-xs text-gray-600 uppercase bg-gray-100">
+    <div class="bg-white rounded-lg shadow p-6 mb-10">
+        <h3 class="text-xl font-semibold mb-4 text-gray-700">Données de la Courbe</h3>
+        <table class="min-w-full table-auto">
+            <thead class="bg-gray-200">
                 <tr>
-                    <th scope="col" class="px-4 py-2">Calculated Time</th>
-                    <th scope="col" class="px-4 py-2">Reseller Type</th>
-                    <th scope="col" class="px-4 py-2">Nombre</th>
-                    <th scope="col" class="px-4 py-2">Reseller Balance</th>
-                    <th scope="col" class="px-4 py-2">Nombre 14/01/2025</th>
-                    <th scope="col" class="px-4 py-2">Balance 14/01/2025</th>
-                    <th scope="col" class="px-4 py-2">GAP Nombre</th>
-                    <th scope="col" class="px-4 py-2">GAP Reseller Balance</th>
+                    <th class="px-4 py-2 text-left">Point</th>
+                    <th class="px-4 py-2 text-left">Valeur 1</th>
+                    <th class="px-4 py-2 text-left">Valeur 2</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr class="border-b">
-                    <td class="px-4 py-2">15</td>
-                    <td class="px-4 py-2">Standard</td>
-                    <td class="px-4 py-2">120</td>
-                    <td class="px-4 py-2">5000</td>
-                    <td class="px-4 py-2">110</td>
-                    <td class="px-4 py-2">4800</td>
-                    <td class="px-4 py-2">10</td>
-                    <td class="px-4 py-2">200</td>
-                </tr>
-                <tr class="border-b">
-                    <td class="px-4 py-2">20</td>
-                    <td class="px-4 py-2">Premium</td>
-                    <td class="px-4 py-2">80</td>
-                    <td class="px-4 py-2">3000</td>
-                    <td class="px-4 py-2">70</td>
-                    <td class="px-4 py-2">2800</td>
-                    <td class="px-4 py-2">10</td>
-                    <td class="px-4 py-2">200</td>
-                </tr>
-                <tr class="border-b">
-                    <td class="px-4 py-2">30</td>
-                    <td class="px-4 py-2">Elite</td>
-                    <td class="px-4 py-2">150</td>
-                    <td class="px-4 py-2">7000</td>
-                    <td class="px-4 py-2">140</td>
-                    <td class="px-4 py-2">6700</td>
-                    <td class="px-4 py-2">10</td>
-                    <td class="px-4 py-2">300</td>
-                </tr>
+            <tbody id="dataTableBody">
+                <!-- Les données seront insérées ici via JavaScript -->
             </tbody>
         </table>
     </div>
 
-    {{-- Script ChartJS --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        // Graphique à barres verticales
-        const ctxBalance = document.getElementById('balanceChart').getContext('2d');
-        const balanceChart = new Chart(ctxBalance, {
-            type: 'bar',
+        // Récupérer les données passées depuis le contrôleur Filament
+        const data = @json($data);
+
+        // Vérification des données dans la console
+        console.log(data);
+
+        // Récupérer les séries de données
+        const value1 = data.map(item => item.value1);
+        const value2 = data.map(item => item.value2);
+        const labels = data.map((_, index) => 'Point ' + (index + 1));
+
+        // Remplir le tableau avec les données
+        const dataTableBody = document.getElementById('dataTableBody');
+        data.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-4 py-2">${index + 1}</td>
+                <td class="px-4 py-2">${item.value1}</td>
+                <td class="px-4 py-2">${item.value2}</td>
+            `;
+            dataTableBody.appendChild(row);
+        });
+
+        // Initialisation du graphique (diagramme à barres)
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar', // Graphique en barres
             data: {
-                labels: ['Standard', 'Premium', 'Elite','gob'], // Labels des types de revendeurs
-                datasets: [{
-                    label: 'Reseller Balance',
-                    data: [5000, 3000, 7000 , 5000], // Données de la balance des revendeurs
-                    backgroundColor: '#4CAF50',
-                    borderColor: '#388E3C',
-                    borderWidth: 1
-                }]
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Valeur 2', // Le nom de la série pour les valeurs de value2
+                        data: value2, // Données de value2
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)', // Couleur des barres
+                        borderColor: 'rgba(75, 192, 192, 1)', // Bordure des barres
+                        borderWidth: 1,
+                    }
+                ]
             },
             options: {
                 responsive: true,
-                indexAxis: 'x', // Barre verticale
-                plugins: {
-                    legend: { display: false }
-                },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true // Commencer l'axe Y à zéro
                     }
                 }
             }
         });
     </script>
-
-
 </x-filament-panels::page>

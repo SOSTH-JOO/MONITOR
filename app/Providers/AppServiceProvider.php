@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\ServiceProvider;
+use App\Models\SecuritySetting;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,22 +28,32 @@ class AppServiceProvider extends ServiceProvider
     $this->checkFailedLoginAndLastLogin();
 }
 
+
+
 protected function checkFailedLoginAndLastLogin()
 {
-    // Vérifier les utilisateurs avec plus de 3 tentatives échouées de connexion
-    $usersFailedLogin = User::where('failed_login', '>', 3)->get();
+    // Récupérer les paramètres de sécurité
+    $securitySetting = SecuritySetting::first(); // Adapter si nécessaire
+
+    // Si les paramètres existent, on utilise les valeurs
+    $lockoutThreshold = $securitySetting->account_lockout_threshold ?? 3; // Nombre de tentatives échouées avant verrouillage
+    $lockoutPeriod = $securitySetting->lockout_counter_period ?? 30; // Période (en jours) pour vérifier la dernière tentative échouée
+
+    // Vérifier les utilisateurs avec plus de tentatives échouées que le seuil défini
+    $usersFailedLogin = User::where('failed_login', '>', $lockoutThreshold)->get();
 
     foreach ($usersFailedLogin as $user) {
-        // Mettre à jour le statut de l'utilisateur à 0 (inactif) si échec de connexion supérieur à 3
+        // Mettre à jour le statut de l'utilisateur à 0 (inactif) si échec de connexion supérieur au seuil
         $user->update(['statut' => 0]);
     }
 
-    // Vérifier les utilisateurs dont la date de dernier login dépasse 30 jours
-    $usersLastLogin = User::where('last_login', '<', Carbon::now()->subDays(30))->get();
+    // Vérifier les utilisateurs dont la date de dernier login dépasse la période de verrouillage
+    $usersLastLogin = User::where('last_login', '<', Carbon::now()->subDays($lockoutPeriod))->get();
 
     foreach ($usersLastLogin as $user) {
         // Mettre à jour le statut de l'utilisateur à 2 (inactif pour longue absence)
         $user->update(['statut' => 2]);
     }
 }
+
 }

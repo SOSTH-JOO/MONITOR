@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SecuritySettingsController;
 use App\Http\Controllers\ProfileController;
 
+Route::get('/', [HomeController::class, 'Chargement'])->name('Chargement');
 
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'showLogin'])->name('showLogin');
@@ -15,6 +16,8 @@ Route::get('/new_password/{slug}', [AuthController::class, 'new_password'])->nam
 Route::post('/new_password/{slug}', [AuthController::class, 'updatePassword'])->name('update.password');
 
 Route::get('/404', [HomeController::class, 'Error404'])->name('404');
+Route::get('/419', [HomeController::class, 'Error419'])->name('419');
+Route::get('/403', [HomeController::class, 'Error403'])->name('403');
 
 
 Route::get('/parametre-securite', [SecuritySettingsController::class, 'edit'])->name('security.edit');

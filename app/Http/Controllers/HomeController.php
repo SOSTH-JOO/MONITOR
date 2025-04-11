@@ -16,6 +16,14 @@ class HomeController extends Controller
     {
         return view('errors.404'); // La vue 'home.blade.php' sera affichée
     }
+    public function Error419()
+    {
+        return view('errors.419'); // La vue 'home.blade.php' sera affichée
+    }
+    public function Error403()
+    {
+        return view('errors.403'); // La vue 'home.blade.php' sera affichée
+    }
 
 
 
@@ -26,6 +34,15 @@ class HomeController extends Controller
         $memos = Memo::with('etapes.commandes')->get();
 
         return view('filament.memos.index', compact('memos'));
+
+
+}
+
+public function chargement()
+{
+
+
+    return view('pages.chargement' );
 
 
 }

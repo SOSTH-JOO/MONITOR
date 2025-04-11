@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
 use App\Models\User;
+use App\Models\SecuritySetting;
 use App\Models\PasswordHistory;
 class AuthController extends Controller
 {
@@ -41,20 +42,28 @@ class AuthController extends Controller
                 return back()->with('message', 'Votre compte est inactif ou dormant. Veuillez contacter l’administrateur.')->withInput();
             }
 
-            // Vérifier si une session est déjà ouverte pour cet utilisateur dans la table sessions
-            $sessionExists = \DB::table('sessions')
-                                ->where('user_id', $user->id)
-                                ->exists();
+                    // Récupérer la configuration de sécurité
+            $securitySetting = SecuritySetting::first(); // ou avec un where() si tu as des configs multiples
 
-            if ($sessionExists) {
-                return back()->with('message', 'Une session est déjà ouverte pour cet utilisateur.')->withInput();
+            // Vérifier si les sessions simultanées sont à éviter
+            if ($securitySetting && $securitySetting->avoid_simultaneous_sessions == 1) {
+                // Vérifier si une session est déjà ouverte pour cet utilisateur
+                $sessionExists = \DB::table('sessions')
+                                    ->where('user_id', $user->id)
+                                    ->exists();
+
+                if ($sessionExists) {
+                    return back()->with('message', 'Une session est déjà ouverte pour cet utilisateur.')->withInput();
+                }
             }
+                    // Récupérer la valeur de password_max_age depuis la table security_settings
+            $passwordMaxAge = SecuritySetting::first()->password_max_age ?? 30; // Valeur par défaut au cas où il n'y a rien
 
             // Vérification de la date du dernier changement de mot de passe
-            if (is_null($user->password_change_at) || Carbon::parse($user->password_change_at)->diffInDays(now()) > 30) {
+            if (is_null($user->password_change_at) || Carbon::parse($user->password_change_at)->diffInDays(now()) > $passwordMaxAge) {
                 // Générer un slug basé sur l'ID utilisateur
-                $slug = base64_encode($user->id); // Encode l'ID utilisateur en base64 pour créer le slug
-                session(['slug_user_' . $slug => $user->id]); // Associer l'ID à ce slug dans la session
+                $slug = base64_encode($user->id);
+                session(['slug_user_' . $slug => $user->id]);
                 return redirect()->route('new.password', ['slug' => $slug]);
             }
 
@@ -123,12 +132,18 @@ class AuthController extends Controller
                 return redirect()->route('login')->with('error', 'Utilisateur introuvable.');
             }
 
-            // Vérifier si le nouveau mot de passe existe dans les 10 derniers mots de passe
-            $lastPasswords = PasswordHistory::where('user_id', $user->id)
-                                             ->orderBy('created_at', 'desc')
-                                             ->take(10)
-                                             ->pluck('password')
-                                             ->toArray();
+                            // Récupérer la configuration de sécurité
+                $securitySetting = SecuritySetting::first(); // Adapter si plusieurs configs
+
+                // Déterminer le nombre de mots de passe à vérifier dans l'historique
+                $passwordHistoryCount = $securitySetting->password_history ?? 10; // Par défaut à 10 si non défini
+
+                // Récupérer les anciens mots de passe
+                $lastPasswords = PasswordHistory::where('user_id', $user->id)
+                                                ->orderBy('created_at', 'desc')
+                                                ->take($passwordHistoryCount)
+                                                ->pluck('password')
+                                                ->toArray();
 
             // Si le nouveau mot de passe existe dans les 10 derniers, empêcher la mise à jour
             if (in_array($request->password, $lastPasswords)) {
@@ -153,5 +168,7 @@ class AuthController extends Controller
             return redirect()->route('login')->with('success', 'Mot de passe mis à jour avec succès.');
         }
 
+
+        
 
 }

@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Filament\Pages;
-use App\Filament\Widgets\StatsOverview;
 use Filament\Pages\Page;
 
 class BCsheets extends Page
@@ -15,10 +14,5 @@ class BCsheets extends Page
     protected static string $view = 'filament.pages.b-csheets';
 
 
-    protected function getHeaderWidgets(): array
-    {
-        return [
-            StatsOverview::class(),
-        ];
-    }
+    
 }
