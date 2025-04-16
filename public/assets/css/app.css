@@ -1,0 +1,46 @@
+:root {
+    --couleur-primaire: #ffee00;
+    --couleur-secondaire: rgb(22, 22, 172);
+}
+
+
+*{
+    font-family: "Agbalumo", system-ui;
+}
+
+.bg-secondaire{
+    background-color: var(--couleur-secondaire);
+}
+.bg-primaire{
+    background-color: var(--couleur-primaire);
+}
+
+/* Style général pour le bouton */
+.btn-primary {
+    background-color: var(--couleur-primaire);
+    padding: 0.5rem 1rem;  /* Espacement */
+    border-radius: 0.25rem;  /* Coins arrondis */
+    color: white;  /* Texte en blanc */
+    text-decoration: none;  /* Retirer la décoration du lien */
+    display: inline-block;  /* Pour permettre l'application de padding */
+    font-size: 1rem;  /* Taille de la police */
+    text-align: center;  /* Centrer le texte */
+    transition: background-color 0.3s ease;  /* Transition douce pour le changement de couleur */
+}
+
+/* Effet hover pour le bouton */
+.btn-primary:hover {
+    background-color: var(--couleur-secondaire); /* Couleur au survol */
+    cursor: pointer;  /* Curseur en forme de main */
+}
+
+
+
+  #sidebar[data-collapsed="true"] .sidebar-title,
+  #sidebar[data-collapsed="true"] .sidebar-links {
+    display: none;
+  }
+
+  #sidebar[data-collapsed="true"] {
+    width: 5rem; /* Réduit la sidebar */
+  }
